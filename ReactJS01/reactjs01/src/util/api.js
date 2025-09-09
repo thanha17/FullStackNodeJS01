@@ -1,21 +1,16 @@
-import axios from './axios.customize';
+// src/util/api.js
+import axios from "./axios.customize";
 
+// ===== AUTH =====
 const createUserApi = (name, email, password) => {
   const URL_API = "/v1/api/register";
-  const data = {
-    name,
-    email,
-    password
-  };
+  const data = { name, email, password };
   return axios.post(URL_API, data);
 };
 
 const loginApi = (email, password) => {
   const URL_API = "/v1/api/login";
-  const data = {
-    email,
-    password
-  };
+  const data = { email, password };
   return axios.post(URL_API, data);
 };
 
@@ -29,4 +24,45 @@ const getAccountApi = () => {
   return axios.get(URL_API);
 };
 
-export { createUserApi, loginApi, getUserApi, getAccountApi };
+// ===== PRODUCT =====
+// 1. Lấy danh sách sản phẩm (chỉ phân trang, không filter nâng cao)
+const getProductsApi = (page = 1, limit = 6) => {
+  const URL_API = `/v1/api/products?page=${page}&limit=${limit}`;
+  return axios.get(URL_API);
+};
+
+// 2. Search + filter (fuzzy, category, price, promotion, sort)
+const searchProductsApi = ({
+  keyword = "",
+  category = "",
+  minPrice = "",
+  maxPrice = "",
+  promotion = "",
+  sortBy = "",
+  page = 1,
+  limit = 6,
+}) => {
+  const query = new URLSearchParams();
+
+  query.append("page", page);
+  query.append("limit", limit);
+
+  if (keyword) query.append("keyword", keyword);
+  if (category) query.append("category", category);
+  if (minPrice) query.append("minPrice", minPrice);
+  if (maxPrice) query.append("maxPrice", maxPrice);
+  if (promotion) query.append("promotion", promotion);
+  if (sortBy) query.append("sortBy", sortBy);
+
+  const URL_API = `/v1/api/products/search?${query.toString()}`;
+  return axios.get(URL_API);
+};
+
+export {
+  createUserApi,
+  loginApi,
+  getUserApi,
+  getAccountApi,
+  getProductsApi,      // danh sách cơ bản
+  searchProductsApi,   // tìm kiếm nâng cao
+};

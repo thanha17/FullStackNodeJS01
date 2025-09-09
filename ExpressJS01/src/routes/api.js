@@ -1,28 +1,43 @@
 const express = require('express');
 
 const {
-    createUser,
-    handleLogin,
-    getUser,
-    getAccount
+  createUser,
+  handleLogin,
+  getUser,
+  getAccount,
 } = require('../controllers/userController');
 
 const auth = require('../middleware/auth');
 const delay = require('../middleware/delay');
 
+const {
+  getProducts,
+  createProduct,
+  searchProducts,
+} = require('../controllers/productController');
+
 const routerAPI = express.Router();
 
-// Áp dụng middleware 'auth' cho tất cả các route bên dưới
-routerAPI.all("/{*any}", auth);
-
+// ===== TEST =====
 routerAPI.get("/", (req, res) => {
-    return res.status(200).json("Hello world api");
+  return res.status(200).json({ message: "Hello world api" });
 });
 
+// ===== AUTH (public) =====
 routerAPI.post("/register", createUser);
 routerAPI.post("/login", handleLogin);
+
+// ===== PRODUCT (public) =====
+routerAPI.get("/products", getProducts);        
+routerAPI.get("/products/search", searchProducts);
+
+// ===== USER (private) =====
+routerAPI.use(auth); // ✅ áp dụng auth cho tất cả route dưới đây
 
 routerAPI.get("/user", getUser);
 routerAPI.get("/account", delay, getAccount);
 
-module.exports = routerAPI; // Export default
+// ===== PRODUCT (private - ví dụ admin mới được thêm) =====
+routerAPI.post("/products", createProduct);
+
+module.exports = routerAPI;
