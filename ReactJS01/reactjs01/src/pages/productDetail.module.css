@@ -1,0 +1,34 @@
+/* Product Detail page scoped styles */
+.wrapper {
+  padding: 20px;
+  padding-top: 120px; /* avoid navbar overlap */
+  max-width: 1100px;
+  margin: 0 auto; /* center the whole block */
+}
+.hero {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 24px;
+  align-items: flex-start;
+}
+.cover {
+  width: 420px;
+  height: 420px;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+.metaTitle {
+  margin: 0 0 8px;
+}
+.similarGrid :global(.ant-card) {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.similarGrid :global(.ant-card:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+.actions {
+  display: flex;
+  gap: 8px;
+}

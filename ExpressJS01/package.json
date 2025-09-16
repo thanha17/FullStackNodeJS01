@@ -5,7 +5,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon./src/server.js",
-    "start": "nodemon ./src/server.js"
+    "start": "nodemon ./src/server.js",
+    "reindex:products": "node ./src/scripts/reindexProducts.js"
   },
   "author": "Nguyễn Quang Thành",
   "license": "ISC",
@@ -22,7 +23,8 @@
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.18.0"
+    "mongoose": "^8.18.0",
+    "@elastic/elasticsearch": "^9.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.28.3",

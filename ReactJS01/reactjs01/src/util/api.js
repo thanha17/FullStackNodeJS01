@@ -58,6 +58,17 @@ const searchProductsApi = ({
   return axios.get(URL_API);
 };
 
+// ===== FAVORITES =====
+const getFavoritesApi = () => axios.get(`/v1/api/favorites`);
+const addFavoriteApi = (productId) => axios.post(`/v1/api/favorites`, { productId });
+const removeFavoriteApi = (productId) => axios.delete(`/v1/api/favorites/${productId}`);
+
+// ===== CART =====
+const getCartApi = () => axios.get(`/v1/api/cart`);
+const addToCartApi = (productId, quantity = 1) => axios.post(`/v1/api/cart/items`, { productId, quantity });
+const updateCartItemApi = (productId, quantity) => axios.put(`/v1/api/cart/items`, { productId, quantity });
+const removeCartItemApi = (productId) => axios.delete(`/v1/api/cart/items/${productId}`);
+
 export {
   createUserApi,
   loginApi,
@@ -65,4 +76,11 @@ export {
   getAccountApi,
   getProductsApi,      // danh sách cơ bản
   searchProductsApi,   // tìm kiếm nâng cao
+  getFavoritesApi,
+  addFavoriteApi,
+  removeFavoriteApi,
+  getCartApi,
+  addToCartApi,
+  updateCartItemApi,
+  removeCartItemApi,
 };

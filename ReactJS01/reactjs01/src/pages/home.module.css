@@ -1,0 +1,61 @@
+/* Home page scoped styles */
+.toolbar {
+  backdrop-filter: saturate(180%) blur(8px);
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+}
+
+.container {
+  padding: 20px;
+  padding-top: 120px; /* avoid navbar overlap */
+  overflow-x: hidden;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.grid :global(.ant-card) {
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.grid :global(.ant-card:hover) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0,0,0,.12);
+}
+
+.image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 8px 8px 0 0;
+}
+
+.actions :global(.ant-btn) {
+  border-radius: 6px;
+}
+
+.sectionTitle {
+  margin: 16px 0;
+  font-weight: 700;
+}
+
+.cartContent {
+  min-width: 380px;
+}
+
+.cartTotal {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+.clickableCard {
+  cursor: pointer;
+}
+
+.counts {
+  display: flex;
+  gap: 8px;
+  color: #666;
+  font-size: 12px;
+  margin-top: 4px;
+}
