@@ -31,9 +31,8 @@ import { Modal } from "cart-library-thanha17";
 const { Search } = Input;
 const { Option } = Select;
 
-// 🔑 đổi cờ này:
-// true  => auto load khi chọn filter
-// false => chỉ load khi bấm nút "Lọc"
+// true => auto fetch khi đổi filter
+// false => chỉ fetch khi bấm nút Lọc
 const autoSearchOnChange = false;
 
 const HomePage = () => {
@@ -42,32 +41,34 @@ const HomePage = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
 
-  // 🔍 Filter state
+  // filter
   const [keyword, setKeyword] = useState("");
   const [category, setCategory] = useState("");
   const [priceRange, setPriceRange] = useState("");
   const [promotion, setPromotion] = useState("");
   const [sortBy, setSortBy] = useState("");
 
-  // 🛒 Cart state
+  // cart
   const [cartItems, setCartItems] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // ❤️ Favorites
+  // favorites
   const [favorites, setFavorites] = useState([]);
 
-  // 👀 Recently viewed
+  // recently viewed
   const [recentlyViewed, setRecentlyViewed] = useState([]);
 
-  // Dedup key
+  // dedupe key
   const lastFetchKeyRef = useRef("");
 
-  // Fetch sản phẩm
+  // fetch products
   const fetchProducts = async (pageNumber, replace = false) => {
     try {
       let res;
       if (keyword || category || priceRange || promotion || sortBy) {
-        const [minPrice, maxPrice] = priceRange ? priceRange.split("-") : ["", ""];
+        const [minPrice, maxPrice] = priceRange
+          ? priceRange.split("-")
+          : ["", ""];
         res = await searchProductsApi({
           page: pageNumber,
           limit: 6,
@@ -105,7 +106,7 @@ const HomePage = () => {
     }
   };
 
-  // Favorites
+  // favorites
   const fetchFavorites = async () => {
     try {
       const res = await getFavoritesApi();
@@ -115,7 +116,7 @@ const HomePage = () => {
     } catch {}
   };
 
-  // Recently viewed (placeholder)
+  // recently viewed (placeholder)
   const fetchRecentlyViewed = async () => {
     try {
       const resAcc = await axios.get(`/v1/api/account`);
@@ -124,7 +125,7 @@ const HomePage = () => {
     } catch {}
   };
 
-  // Cart
+  // cart
   const fetchCart = async () => {
     try {
       const res = await getCartApi();
@@ -140,23 +141,22 @@ const HomePage = () => {
     } catch {}
   };
 
+  // ✅ load lần đầu khi vào trang
   useEffect(() => {
-    // 👇 Fetch lần đầu khi vào trang
     fetchProducts(1, true);
   }, []);
 
-  // Auto fetch products khi page/filter thay đổi (nếu autoSearchOnChange = true)
+  // ✅ load lại khi page/filter thay đổi
   useEffect(() => {
-    if (!autoSearchOnChange) return;
     const key = `${page}|${keyword}|${category}|${priceRange}|${promotion}|${sortBy}`;
     if (lastFetchKeyRef.current === key) return;
     lastFetchKeyRef.current = key;
 
-    const shouldReplace = page === 1;
-    fetchProducts(page, shouldReplace);
+    const replace = page === 1;
+    fetchProducts(page, replace);
   }, [page, keyword, category, priceRange, promotion, sortBy]);
 
-  // Fetch favorites + recently viewed khi vào page
+  // fetch favorites + recently viewed
   useEffect(() => {
     fetchFavorites();
     fetchRecentlyViewed();
@@ -164,27 +164,25 @@ const HomePage = () => {
 
   const loadMore = () => setPage((prev) => prev + 1);
 
-  // Khi bấm "Lọc"
+  // khi bấm "Lọc"
   const handleSearch = () => {
     lastFetchKeyRef.current = "";
     setProducts([]);
     setHasMore(true);
-    setPage(1);
-
-    // Nếu chế độ bấm nút => gọi fetchProducts thủ công
-    if (!autoSearchOnChange) {
-      fetchProducts(1, true);
-    }
+    setPage(1); // useEffect sẽ tự fetch
   };
 
-  // Cart handlers
+  // cart handlers
   const handleAddToCart = async (product) => {
     try {
       const pid = product._id || product.id;
       await addToCartApi(pid, 1);
       await fetchCart();
     } catch (e) {
-      notification.error({ message: "CART", description: e?.response?.data?.EM || e.message });
+      notification.error({
+        message: "CART",
+        description: e?.response?.data?.EM || e.message,
+      });
     }
   };
 
@@ -193,7 +191,10 @@ const HomePage = () => {
       await updateCartItemApi(id, quantity);
       await fetchCart();
     } catch (e) {
-      notification.error({ message: "CART", description: e?.response?.data?.EM || e.message });
+      notification.error({
+        message: "CART",
+        description: e?.response?.data?.EM || e.message,
+      });
     }
   };
 
@@ -202,11 +203,14 @@ const HomePage = () => {
       await removeCartItemApi(id);
       await fetchCart();
     } catch (e) {
-      notification.error({ message: "CART", description: e?.response?.data?.EM || e.message });
+      notification.error({
+        message: "CART",
+        description: e?.response?.data?.EM || e.message,
+      });
     }
   };
 
-  // Favorites toggle
+  // favorites toggle
   const isFavorite = (productId) => favorites.includes(productId);
   const toggleFavorite = async (product) => {
     try {
@@ -220,18 +224,37 @@ const HomePage = () => {
         setFavorites((prev) => [...prev, pid]);
       }
     } catch (e) {
-      notification.error({ message: "FAVORITE", description: e?.response?.data?.EM || e.message });
+      notification.error({
+        message: "FAVORITE",
+        description: e?.response?.data?.EM || e.message,
+      });
     }
   };
 
-  const totalAmount = cartItems.reduce((sum, it) => sum + it.price * it.quantity, 0);
+  const totalAmount = cartItems.reduce(
+    (sum, it) => sum + it.price * it.quantity,
+    0
+  );
 
   return (
     <div className={styles.container}>
       <h2>Danh sách sản phẩm</h2>
 
       {/* Toolbar filter */}
-      <div className={styles.toolbar} style={{ position: "fixed", top: 46, left: 0, right: 0, zIndex: 1000, display: "flex", alignItems: "center", gap: 10, padding: "10px 20px" }}>
+      <div
+        className={styles.toolbar}
+        style={{
+          position: "fixed",
+          top: 46,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          gap: 10,
+          padding: "10px 20px",
+        }}
+      >
         <Search
           placeholder="Tìm sản phẩm..."
           value={keyword}
@@ -241,27 +264,59 @@ const HomePage = () => {
           style={{ width: 250 }}
         />
 
-        <Select placeholder="Danh mục" value={category || undefined} onChange={(val) => { setCategory(val); if (autoSearchOnChange) handleSearch(); }} style={{ width: 150 }}>
+        <Select
+          placeholder="Danh mục"
+          value={category || undefined}
+          onChange={(val) => {
+            setCategory(val);
+            if (autoSearchOnChange) handleSearch();
+          }}
+          style={{ width: 150 }}
+        >
           <Option value="">Tất cả</Option>
           <Option value="Nước hoa">Nước hoa</Option>
           <Option value="laptop">Laptop</Option>
           <Option value="accessory">Phụ kiện</Option>
         </Select>
 
-        <Select placeholder="Khoảng giá" value={priceRange || undefined} onChange={(val) => { setPriceRange(val); if (autoSearchOnChange) handleSearch(); }} style={{ width: 150 }}>
+        <Select
+          placeholder="Khoảng giá"
+          value={priceRange || undefined}
+          onChange={(val) => {
+            setPriceRange(val);
+            if (autoSearchOnChange) handleSearch();
+          }}
+          style={{ width: 150 }}
+        >
           <Option value="">Tất cả</Option>
           <Option value="0-1000000">0 - 1.000.000₫</Option>
           <Option value="1000000-10000000">1.000.000 - 10.000.000₫</Option>
           <Option value="10000000-100000000">10.000.000 - 100.000.000₫</Option>
         </Select>
 
-        <Select placeholder="Khuyến mãi" value={promotion || undefined} onChange={(val) => { setPromotion(val); if (autoSearchOnChange) handleSearch(); }} style={{ width: 120 }}>
+        <Select
+          placeholder="Khuyến mãi"
+          value={promotion || undefined}
+          onChange={(val) => {
+            setPromotion(val);
+            if (autoSearchOnChange) handleSearch();
+          }}
+          style={{ width: 120 }}
+        >
           <Option value="">Tất cả</Option>
           <Option value="true">Có KM</Option>
           <Option value="false">Không KM</Option>
         </Select>
 
-        <Select placeholder="Sắp xếp" value={sortBy || undefined} onChange={(val) => { setSortBy(val); if (autoSearchOnChange) handleSearch(); }} style={{ width: 150 }}>
+        <Select
+          placeholder="Sắp xếp"
+          value={sortBy || undefined}
+          onChange={(val) => {
+            setSortBy(val);
+            if (autoSearchOnChange) handleSearch();
+          }}
+          style={{ width: 150 }}
+        >
           <Option value="">Mặc định</Option>
           <Option value="priceAsc">Giá tăng dần</Option>
           <Option value="priceDesc">Giá giảm dần</Option>
@@ -270,12 +325,23 @@ const HomePage = () => {
         </Select>
 
         {!autoSearchOnChange && (
-          <Button type="primary" onClick={handleSearch}>Lọc</Button>
+          <Button type="primary" onClick={handleSearch}>
+            Lọc
+          </Button>
         )}
 
         {/* Cart */}
-        <div style={{ marginLeft: "auto", cursor: "pointer" }} onClick={async () => { setIsCartOpen(true); await fetchCart(); }}>
-          <Badge count={cartItems.reduce((sum, i) => sum + i.quantity, 0)} size="small">
+        <div
+          style={{ marginLeft: "auto", cursor: "pointer" }}
+          onClick={async () => {
+            setIsCartOpen(true);
+            await fetchCart();
+          }}
+        >
+          <Badge
+            count={cartItems.reduce((sum, i) => sum + i.quantity, 0)}
+            size="small"
+          >
             <ShoppingCartOutlined style={{ fontSize: 28 }} />
           </Badge>
         </div>
@@ -300,15 +366,39 @@ const HomePage = () => {
                 <Card
                   className={styles.clickableCard}
                   onClick={() => navigate(`/product/${item._id || item.id}`)}
-                  cover={<img alt={item.name} src={item.image || "https://via.placeholder.com/150"} className={styles.image} />}
+                  cover={
+                    <img
+                      alt={item.name}
+                      src={item.image || "https://via.placeholder.com/150"}
+                      className={styles.image}
+                    />
+                  }
                   actions={[
-                    <Button type="primary" onClick={(e) => { e.stopPropagation(); handleAddToCart(item); }}>Thêm vào giỏ</Button>,
-                    <Button onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}>
-                      {isFavorite(item._id || item.id) ? "💖 Bỏ thích" : "🤍 Yêu thích"}
+                    <Button
+                      type="primary"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAddToCart(item);
+                      }}
+                    >
+                      Thêm vào giỏ
+                    </Button>,
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(item);
+                      }}
+                    >
+                      {isFavorite(item._id || item.id)
+                        ? "💖 Bỏ thích"
+                        : "🤍 Yêu thích"}
                     </Button>,
                   ]}
                 >
-                  <Card.Meta title={item.name} description={`Giá: ${item.price}₫`} />
+                  <Card.Meta
+                    title={item.name}
+                    description={`Giá: ${item.price}₫`}
+                  />
                   <div className={styles.counts}>
                     <span>🛒 {item.purchasesCount || 0}</span>
                     <span>💬 {item.commentsCount || 0}</span>
@@ -330,14 +420,37 @@ const HomePage = () => {
             renderItem={(it) => (
               <List.Item
                 actions={[
-                  <Button size="small" onClick={() => handleUpdateQuantity(it.id, Math.max(0, it.quantity - 1))}>-</Button>,
+                  <Button
+                    size="small"
+                    onClick={() =>
+                      handleUpdateQuantity(it.id, Math.max(0, it.quantity - 1))
+                    }
+                  >
+                    -
+                  </Button>,
                   <span style={{ padding: "0 8px" }}>{it.quantity}</span>,
-                  <Button size="small" onClick={() => handleUpdateQuantity(it.id, it.quantity + 1)}>+</Button>,
-                  <Button danger size="small" onClick={() => handleRemoveItem(it.id)}>Xoá</Button>,
+                  <Button
+                    size="small"
+                    onClick={() => handleUpdateQuantity(it.id, it.quantity + 1)}
+                  >
+                    +
+                  </Button>,
+                  <Button
+                    danger
+                    size="small"
+                    onClick={() => handleRemoveItem(it.id)}
+                  >
+                    Xoá
+                  </Button>,
                 ]}
               >
-                <List.Item.Meta title={it.name} description={`Giá: ${it.price}₫`} />
-                <div style={{ fontWeight: 600 }}>{(it.price * it.quantity).toLocaleString()}₫</div>
+                <List.Item.Meta
+                  title={it.name}
+                  description={`Giá: ${it.price}₫`}
+                />
+                <div style={{ fontWeight: 600 }}>
+                  {(it.price * it.quantity).toLocaleString()}₫
+                </div>
               </List.Item>
             )}
           />
